@@ -11,15 +11,42 @@ This repository contains a two-phase pipeline for processing and analyzing clini
 # Alzheimer Detection using ResNet50 and InceptionV3
 
 ## Overview
-This project focuses on detecting Alzheimer's disease using two powerful convolutional neural networks: ResNet50 and InceptionV3. These models are pretrained on the ImageNet dataset and are fine-tuned to classify MRI images for Alzheimer detection.
+This project classifies MRI brain scans into 4 Alzheimer's stages using transfer learning on InceptionV3 and ResNet50, both pretrained on ImageNet. The dataset is class-balanced via SMOTE before training.
 
-## Features
-- Utilizes ResNet50 and InceptionV3 architectures for Alzheimer detection.
-- Includes scripts for preprocessing MRI images and evaluating model performance.
-- Implements transfer learning to adapt the pretrained models to the Alzheimer's MRI dataset.
+**4 classes:** NonDemented (ND), VeryMildDemented (VMD), MildDemented (MILD_D), ModerateDemented (MOD_D)
+
+## Dataset
+- 6,407 MRI images across 4 classes (imbalanced)
+- SMOTE oversampling → 12,832 balanced samples
+- Image size: 150×150
+- Augmentation: brightness range [0.8, 1.2], zoom [0.99, 1.01], horizontal flip
+- Split: 80% train / 20% validation / 20% test (sequential splits)
+
+## Models
+
+### InceptionV3
+- Pretrained InceptionV3 (ImageNet weights, top layers frozen)
+- Custom head: GlobalAveragePooling → Flatten → BatchNorm → Dense(512) → Dense(256) → Dense(128) → Dense(64) → Dense(4, softmax)
+- Dropout(0.5) + BatchNormalization throughout
+- Optimizer: Adam | Loss: CategoricalCrossentropy | Epochs: 40
+- Metrics tracked: Accuracy, Precision, Recall, AUC
+
+### ResNet50
+- Pretrained ResNet50 (ImageNet weights)
+- Fine-tuned on the same 4-class MRI dataset
 
 ## Performance
-The project compares the performance of the two models, with InceptionV3 achieving the highest test accuracy of 91.43%.
+InceptionV3 achieves the highest test accuracy of **91.43%** with AUC **0.9686**.
+
+| Metric | InceptionV3 |
+|---|---|
+| Test Accuracy | 91.43% |
+| AUC | 0.9686 |
+| Macro F1 | 0.86 |
+| Precision | 0.837 |
+| Recall | 0.816 |
+
+Evaluated with per-class classification report and confusion matrix heatmap.
 ---
 
 ## ⚙️ Phase 2: Automated 3D Segmentation & Mesh Generator (BioEM Ready)
